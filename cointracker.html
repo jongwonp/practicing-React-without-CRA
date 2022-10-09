@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+    <div id="root"></div>
+</body>
+<script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script type="text/babel">
+    const root = document.getElementById("root")
+    const Container =  () => {
+      const [loading, setLoding] = React.useState(true);
+      const [coins, setCoins] = React.useState([]);
+      const [dollar, setDollar] = React.useState();
+      const [coinValue, setCoinValue] = React.useState();
+
+      React.useEffect(() => {
+        fetch("https://api.coinpaprika.com/v1/tickers")
+        .then(response => response.json())
+        .then(json => {
+          setCoins(['',...json.splice(0,100)]);
+          setLoding(false);
+        })
+      },[])
+
+      const inputDollar = (event) => {setDollar(event.target.value)}
+      const selectChange = (event) => {
+        const selectedOption = event.target.selectedOptions[0];
+        setCoinValue(selectedOption.value.split(','))
+      }
+      return (
+        <div>
+          <h1>Coin Converter {loading ? "" : `(${coins.length - 1})`}</h1>
+          {loading ? <strong>loading...</strong> : <select onChange={selectChange}>
+            {coins.map(coin => {
+            return coin.name ? <option key={coin.id} name={coin.name} value={[coin.quotes.USD.price, coin.symbol]}>{coin.name} ({coin.symbol}) : ${coin.quotes.USD.price} USD</option> : <option>select a option</option>})}
+          </select>
+          }
+          <hr/>
+          <input onChange={inputDollar} type="number"></input> USD
+          <div id="convert">{dollar} USD : {dollar && (coinValue && coinValue.length === 2)   ? <span>{dollar / coinValue[0]} {coinValue[1]}</span> : <span></span> } </div>
+        </div>
+      )
+}
+    ReactDOM.render(<Container />, root)
+</script>
+</html>
+
+<!-- 마지막 div에서 (coinValue && coinValue.length === 2) 의 이유는 
+  coinValue의 초기값은 undefined이고, 이후 첫번째 option이 ['select a option'] 이기에 배열의 길이가 1이다.
+  제대로 된 option의 value로 주었던 [coin.quotes.USD.price, coin.symbol] 형태에 맞게 배열의 길이가 2가 되어야 하기 때문-->

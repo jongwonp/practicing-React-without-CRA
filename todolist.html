@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+    <div id="root"></div>
+</body>
+<script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script type="text/babel">
+    const root = document.getElementById("root")
+    const Container =  () => {
+        const [toDo, setTodo] = React.useState('');
+        const [toDos, setTodos] = React.useState([]);
+        const onChange = (event) => setTodo(event.target.value);
+        const onSubmit = (event) => {
+            event.preventDefault();
+            if(toDo === ''){
+            return;
+            }
+            if(toDos.includes(toDo)){
+                alert('You already have same ToDo')
+                setTodo('')
+                return;
+            }
+            setTodos(currentArray => [toDo, ...currentArray])
+            setTodo('');
+        };
+        const complete = (event) => {
+            const {style} = event.target.parentNode.getElementsByTagName('span')[0]
+            if(event.target.checked){
+                style.textDecorationLine = 'line-through'
+                style.color = 'grey'
+            } else {
+                style.textDecorationLine = ''
+                style.color = ''
+            }
+        }
+        const deleteTodo = (event) => {
+            const span = event.target.parentNode.getElementsByTagName('span')[0]
+            setTodos(toDos => toDos.filter(toDo => toDo !== span.innerText))
+        }
+        return (
+            <div>
+                <h1>My To Dos ({toDos.length})</h1>
+                <form onSubmit={onSubmit}>
+                    <input
+                    onChange={onChange}
+                    value={toDo}
+                    placeholder="Write your to do..." />
+                    <button>Add To Do</button>
+                </form>
+                <hr />
+                <ul>
+                    {toDos.map(item => <li key={item}><input type="checkbox" onChange={complete}></input><span>{item}</span> <button onClick={deleteTodo}>❌</button> </li>)} 
+                </ul>
+            </div>
+        );
+    }
+    ReactDOM.render(<Container />, root)
+</script>
+</html>
+
+<!-- local storage를 통해서 todo가 사라지지 않고 저장되는 기능 추가 하기 -->
